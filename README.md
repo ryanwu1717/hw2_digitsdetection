@@ -24,13 +24,13 @@ Using Anaconda and pytorch to implement this method.
     conda install torchvision -c pytorch
 
 ## Getting_labels
-Change the path which is in the `get_labels.py`.
+Change the path which is in the `buildlabel.py`.
 
     f = h5py.File('./train/digitStruct.mat','r')
     Image.open('./train/'+IMG_NAME)
 In order to get the ground truth. <br>
 For example： <br>
-![image](https://github.com/eddieczc/Image-Processing-via-deep-learning/blob/master/HW2_Digits%20detection/Images/labels.png)
+![image](https://github.com/ryanwu1717/hw2_digitsdetection/blob/main/image/labels.png)
 
 ## Implement
 The code is programing on 
@@ -63,6 +63,7 @@ In Windows:
 - Start (button) -> All programs -> CMake -> CMake (gui) ->
 
 - [look at image](https://habrastorage.org/webt/pz/s1/uu/pzs1uu4heb7vflfcjqn-lxy-aqu.jpeg) In CMake: Enter input path to the darknet Source, and output path to the Binaries -> Configure (button) -> Optional platform for generator: `x64`  -> Finish -> Generate -> Open Project ->
+![image](https://github.com/ryanwu1717/hw2_digitsdetection/blob/main/image/cmake.png)
 
 - in MS Visual Studio: Select: x64 and Release -> Build -> Build solution
 
@@ -72,56 +73,52 @@ In Windows:
     
 
     
-*Step 4.* Preparing the data : training data, ground truth label, and some data that the yolov4’s method needs. You can get it by `create_path.py`.  
+*Step 4.* Preparing the data : training data, ground truth label, and some data that the yolov4’s method needs. You can get it by `buildtext.py`.  
 For example: each image's path, .data and .names <br>
-![image](https://github.com/eddieczc/Image-Processing-via-deep-learning/blob/master/HW2_Digits%20detection/Images/path.png)
-![image](https://github.com/eddieczc/Image-Processing-via-deep-learning/blob/master/HW2_Digits%20detection/Images/data.png)
+![image](https://github.com/ryanwu1717/hw2_digitsdetection/blob/main/image/train.png)![image](https://github.com/ryanwu1717/hw2_digitsdetection/blob/main/image/test.png)
+![image](https://github.com/ryanwu1717/hw2_digitsdetection/blob/main/image/IOCname.png)![image](https://github.com/ryanwu1717/hw2_digitsdetection/blob/main/image/IOCdata.png)
 
-*Step 5.* After preparing all of the data, we need to create the .cfg file and start to train the model with the yolo [pretrained](https://github.com/AlexeyAB/darknet/releases/download/darknet_yolo_v3_optimal/yolov4.weights "link") model. <br>
+*Step 5.* After preparing all of the data, we need to Create file `yolo-obj.cfg` with the same content as in `yolov4-custom.cfg` and start to train the model with pretrain the yolo  [yolov4.conv.137](https://github.com/AlexeyAB/darknet/releases/download/darknet_yolo_v3_optimal/yolov4.conv.137) model. OR tiny-yolo [yolov4.conv.137](https://github.com/AlexeyAB/darknet/releases/download/darknet_yolo_v3_optimal/yolov4.conv.137)  <br>
 
-**Changed the filter value such as filters=(classes + 5)x3) and the class value.** <br>
-![image](https://github.com/eddieczc/Image-Processing-via-deep-learning/blob/master/HW2_Digits%20detection/Images/model.png)
+- change line batch to [`batch=64`](https://github.com/AlexeyAB/darknet/blob/0039fd26786ab5f71d5af725fc18b3f521e7acfd/cfg/yolov3.cfg#L3)
+- change line subdivisions to [`subdivisions=16`](https://github.com/AlexeyAB/darknet/blob/0039fd26786ab5f71d5af725fc18b3f521e7acfd/cfg/yolov3.cfg#L4)
+- change line max_batches to (`classes*2000`, but not less than number of training images and not less than `6000`), f.e. [`max_batches=6000`](https://github.com/AlexeyAB/darknet/blob/0039fd26786ab5f71d5af725fc18b3f521e7acfd/cfg/yolov3.cfg#L20) if you train for 3 classes
+- change line steps to 80% and 90% of max_batches, f.e. [`steps=4800,5400`](https://github.com/AlexeyAB/darknet/blob/0039fd26786ab5f71d5af725fc18b3f521e7acfd/cfg/yolov3.cfg#L22)
+- changed the filter value such as filters=(classes + 5)x3) and the class value.** <br>
+![image](https://github.com/ryanwu1717/hw2_digitsdetection/blob/main/image/modal.png)
 
-Use this command line for training
-    ./darknet detector train [IOC.data] [yolov4_IOC_tiny.cfg] [yolov4_IOC_tiny_last.weights]
+
+CD to the darknet.exe folder and use this command line for training
+    darknet.exe detector data/IOC.data cfg/yolov4_tiny_custom.cfg yolov4-tiny.conv.29 
 
 ## Testing
 Use this command line for testing. <br>
+    darknet.exe detector test data/IOC.data  cfg/yolov4_tiny_custom.cfg backup/yolov4_tiny_custom_best.weights -ext_output -dont_show -out  result.json < data/test.txt
 
-`./darknet detector test [IOC.data] [yolov4_IOC_tiny.cfg] [yolov4_IOC_tiny_last.weights] [Image_path]` <br>
     
-    Loading weights from /home/naip/IOC/yolo_tiny/darknet/backup/yolov4_IOC_tiny_last.weights...
-    seen 64, trained: 33718 K-images (526 Kilo-batches_64)
+    Loading weights from backup/yolov4_tiny_custom_best.weights...
+    seen 64, trained: 31968 K-images (499 Kilo-batches_64)
     Done! Loaded 38 layers from weights-file
+    Enter Image Path: data/IOC/test/117.jpg
     Detection layer: 30 - type = 28
     Detection layer: 37 - type = 28
-    /home/naip/IOC/yolo_tiny/darknet/data/IOC/test/1.png: Predicted in 240.240000 milli-seconds.
-    5: 93%
-
-`./darknet detector test [IOC.data] [yolov4_IOC_tiny.cfg] [yolov4_IOC_tiny_last.weights] -ext_output -dont_show -out result.json [</test.txt]` <br>
-    
-    /home/naip/IOC/yolo_tiny/darknet/data/IOC/test/13067.png: Predicted in 4.770000 milli-seconds.
-    2: 52%  (left_x:  115   top_y:   14   width:   13   height:   18)
-    2: 56%  (left_x:  125   top_y:   14   width:   12   height:   18)
-    7: 71%  (left_x:  138   top_y:   14   width:   12   height:   17)
-    Enter Image Path:  Detection layer: 30 - type = 28
-     Detection layer: 37 - type = 28
-    /home/naip/IOC/yolo_tiny/darknet/data/IOC/test/13068.png: Predicted in 4.959000 milli-seconds.
-    6: 99%  (left_x:   35   top_y:    8   width:   11   height:   25)
-    7: 95%  (left_x:   47   top_y:    9   width:   10   height:   24)
+    data/IOC/test/117.jpg: Predicted in 15.932000 milli-seconds.
+    3: 91%
+    8: 88%
+And it bring out a result.json of all result it predicted
 
 
 ## Organising Materials
 Input command to get the result form the test data by yolov4 model, the value of the bounding box is x_center, y_center, width and height. <br>
-So, I load the test image size to calculate the (y1, x1, y2, x2) as (top , left, right ,bottom) in order to get the mAP value. <br>
-![image](https://github.com/eddieczc/Image-Processing-via-deep-learning/blob/master/HW2_Digits%20detection/Images/result.png)   
+So, I load the test image size to calculate the (y1, x1, bbox_width, bbox_height) as (top , left, width ,height) in order to get the coco result. <br>
+![image](https://github.com/ryanwu1717/hw2_digitsdetection/blob/main/image/answer.png)
 
 ## Results
 ### Prediction 
-![image](https://github.com/eddieczc/Image-Processing-via-deep-learning/blob/master/HW2_Digits%20detection/Images/pred_img.png) <br> 
+![image](https://github.com/ryanwu1717/hw2_digitsdetection/blob/main/image/predict.png)  <br> 
 ### speed benchmark from google Colab
-![image](https://github.com/eddieczc/Image-Processing-via-deep-learning/blob/master/HW2_Digits%20detection/Images/speed.png) <br> 
+![image](https://github.com/ryanwu1717/hw2_digitsdetection/blob/main/image/banchmark.png) <br> 
 
 ## Make-Submission
 Use the `create_josn.py` to get the final file. <br>
-Submit the file `StudentID.json`, to the google drive and  get the mPA scroe from TA. <br>
+Submit the file `StudentID.json`, to  get the mPA scroe from TA. <br>
