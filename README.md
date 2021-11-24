@@ -88,12 +88,12 @@ For example: each image's path, .data and .names <br>
 ![image](https://github.com/ryanwu1717/hw2_digitsdetection/blob/main/image/modal.png)
 
 
-CD to the darknet.exe folder and use this command line for training
-    darknet.exe detector data/IOC.data cfg/yolov4_tiny_custom.cfg yolov4-tiny.conv.29 
+CD to the darknet.exe folder and use this command line for training<br>
+    `darknet.exe detector data/IOC.data cfg/yolov4_tiny_custom.cfg yolov4-tiny.conv.29 `
 
 ## Testing
 Use this command line for testing. <br>
-    darknet.exe detector test data/IOC.data  cfg/yolov4_tiny_custom.cfg backup/yolov4_tiny_custom_best.weights -ext_output -dont_show -out  result.json < data/test.txt
+   ` darknet.exe detector test data/IOC.data  cfg/yolov4_tiny_custom.cfg backup/yolov4_tiny_custom_best.weights -ext_output -dont_show -out  result.json < data/test.txt`
 
     
     Loading weights from backup/yolov4_tiny_custom_best.weights...
