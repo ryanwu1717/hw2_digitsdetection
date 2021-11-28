@@ -88,12 +88,20 @@ For example: each image's path, .data and .names <br>
 ![image](https://github.com/ryanwu1717/hw2_digitsdetection/blob/main/image/modal.png)
 
 
-CD to the darknet.exe folder and use this command line for training
-    darknet.exe detector data/IOC.data cfg/yolov4_tiny_custom.cfg yolov4-tiny.conv.29 
+CD to the darknet.exe folder and use this command line for training<br>
+    `darknet.exe detector data/IOC.data cfg/yolov4_tiny_custom.cfg yolov4-tiny.conv.29 `
+
+![image](https://github.com/ryanwu1717/hw2_digitsdetection/blob/main/image/chart.png)
+
+After finishing training you can test for your test dataset to calculate mAP<br>
+For improving the acc I have try 
+- set flag `random=1` in your `.cfg`-file - it will increase precision by training Yolo for different resolutions: [link](https://github.com/AlexeyAB/darknet/blob/0039fd26786ab5f71d5af725fc18b3f521e7acfd/cfg/yolov3.cfg#L788)
+- increase network resolution in your `.cfg`-file (`height=608`, `width=608` or any value multiple of 32) - it will increase precision
+- decresing the learningrate when the model is sure
 
 ## Testing
 Use this command line for testing. <br>
-    darknet.exe detector test data/IOC.data  cfg/yolov4_tiny_custom.cfg backup/yolov4_tiny_custom_best.weights -ext_output -dont_show -out  result.json < data/test.txt
+   ` darknet.exe detector test data/IOC.data  cfg/yolov4_tiny_custom.cfg backup/yolov4_tiny_custom_best.weights -ext_output -dont_show -out  result.json < data/test.txt`
 
     
     Loading weights from backup/yolov4_tiny_custom_best.weights...
